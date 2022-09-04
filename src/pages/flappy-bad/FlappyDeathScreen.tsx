@@ -23,9 +23,9 @@ export default function FlappyDeathScreen(props:{score:number,time:number}) {
             </h2>
             <h2>
                 time: {
-                    props.time >= 60000 ?
-                        Math.floor(props.time/60000).toFixed(0)+":"+(props.time/1000).toFixed(2) :
-                        (props.time/1000).toFixed(2)+"s"
+                    props.time >= 60 ?
+                        Math.floor(props.time/60).toFixed(0)+":"+(props.time).toFixed(2) :
+                        (props.time).toFixed(2)+"s"
                 }
             </h2>
         </div>

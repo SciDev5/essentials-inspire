@@ -6,8 +6,11 @@ import ObstacleJSX from "./ObstacleJSX";
 import Obstacle from "./Obstacle";
 import FlappyStartScreen from "./FlappyStartScreen";
 import FlappyDeathScreen from "./FlappyDeathScreen";
+import FlappyPauseScreen from "./FlappyPauseScreen";
 
-export default class FlappyGame extends React.Component<{_?:never},{
+export default class FlappyGame extends React.Component<{
+    scrollPause:boolean,
+},{
     score: number,
     lives: number,
     showDeathScreen: boolean,
@@ -58,6 +61,8 @@ export default class FlappyGame extends React.Component<{_?:never},{
 
 
     onPressSpace() {
+        if (this.props.scrollPause)
+            return;
         if (this.isPlaying)
             this.bird.flap();
         else if (this.canStart)
@@ -145,13 +150,15 @@ export default class FlappyGame extends React.Component<{_?:never},{
     private playTime = 0;
     private playStartTime = 0;
     async loop() {
-        const { t:launchTime } = await this.waitForNextFrame;
+        await this.waitForNextFrame;
         this.runTime = 0;
 
         while (this.looping !== undefined) {
+            const { dt } = await this.waitForNextFrame;
 
-            const { dt, t } = await this.waitForNextFrame;
-            this.runTime = t-launchTime;
+            if (this.props.scrollPause) continue;
+
+            this.runTime += dt;
 
             if (this.isPlaying) {
                 this.playTime = this.runTime-this.playStartTime;
@@ -196,6 +203,8 @@ export default class FlappyGame extends React.Component<{_?:never},{
         return (
             <div
                 className={css({
+                    overflow: "hidden",
+                },{
                     position: "relative",
                     width: "100%",
                     height: "100vh",
@@ -245,6 +254,7 @@ export default class FlappyGame extends React.Component<{_?:never},{
                 {this.state.showStartScreen && <FlappyStartScreen/>}
                 {this.state.showDeathScreen && <FlappyDeathScreen {...{score,time:this.playTime}} />}
 
+                {this.props.scrollPause && <FlappyPauseScreen/>}
             </div>
         );
     }
