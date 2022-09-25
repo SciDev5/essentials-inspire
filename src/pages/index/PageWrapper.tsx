@@ -22,8 +22,10 @@ export default function PageWrapper() {
                 },
             })}>
                 <Link to="/">Essentials-Inspire</Link>
-                <Link to={"/"+routes.flappyBad}>Flappybad</Link>
+                <Link to={"/"+routes.flappybird}>Flappybad</Link>
+                {/* <Link to={"/"+routes.tetris}>tertis</Link> */}
                 <Link to={"/"+routes.qrMaker}>QRMaker</Link>
+                <Link to={"/"+routes.mahtTrainer}>MahtTraienr</Link>
             </nav>
             <Outlet/>
         </>

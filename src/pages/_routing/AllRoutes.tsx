@@ -4,7 +4,9 @@ import PageWrapper from "../index/PageWrapper";
 import Pages from "./Pages";
 
 export const routes = {
-    flappyBad: "flappy",
+    flappybird: "flappy",
+    tetris: "tetris",
+    mahtTrainer: "matht",
     qrMaker: "qrmake",
     qrDataViewLink: "ql/:type/:data/:isBinary",
 } as const;
@@ -16,9 +18,11 @@ export default function AllRoutes() {
     return (
         <Routes>
             <Route path="/" element={<PageWrapper/>}>
-                <Route path={routes.flappyBad} element={<Pages.FlappyBad/>} />
+                <Route path={routes.flappybird} element={<Pages.FlappyBad/>} />
                 <Route path={routes.qrMaker} element={<Pages.QRMaker/>} />
                 <Route path={routes.qrDataViewLink} element={<Pages.QRGeneratedLink/>} />
+                <Route path={routes.tetris} element={<Pages.Tertis/>} />
+                <Route path={routes.mahtTrainer} element={<Pages.MahtTraienr/>} />
             </Route>
         </Routes>
     );
