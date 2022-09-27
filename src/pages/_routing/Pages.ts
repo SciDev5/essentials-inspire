@@ -1,3 +1,4 @@
+import _Page_AlgebraExecutor from "../algebra-executor/_Page_AlgebraExecutor";
 import _Page_FlappyBad from "../flappy-bad/_Page_FlappyBad";
 import _Page_MahtTrainer from "../maht-trainer/_Page_MahtTrainer";
 import _Page_QRDataView from "../qrmaker/_Page_QRDataView";
@@ -10,5 +11,6 @@ const Pages = {
     QRMaker: _Page_QRMaker,
     QRGeneratedLink: _Page_QRDataView,
     MahtTraienr: _Page_MahtTrainer,
+    AlgebraExecutor: _Page_AlgebraExecutor,
 } as const;
 export default Pages;

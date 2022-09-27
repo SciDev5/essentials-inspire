@@ -26,6 +26,7 @@ export default function PageWrapper() {
                 {/* <Link to={"/"+routes.tetris}>tertis</Link> */}
                 <Link to={"/"+routes.qrMaker}>QRMaker</Link>
                 <Link to={"/"+routes.mahtTrainer}>MahtTraienr</Link>
+                <Link to={"/"+routes.algebraExecutor}>Algebra tool [AlEx]</Link>
             </nav>
             <Outlet/>
         </>

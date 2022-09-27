@@ -7,6 +7,7 @@ export const routes = {
     flappybird: "flappy",
     tetris: "tetris",
     mahtTrainer: "matht",
+    algebraExecutor: "al-ex",
     qrMaker: "qrmake",
     qrDataViewLink: "ql/:type/:data/:isBinary",
 } as const;
@@ -23,6 +24,7 @@ export default function AllRoutes() {
                 <Route path={routes.qrDataViewLink} element={<Pages.QRGeneratedLink/>} />
                 <Route path={routes.tetris} element={<Pages.Tertis/>} />
                 <Route path={routes.mahtTrainer} element={<Pages.MahtTraienr/>} />
+                <Route path={routes.algebraExecutor} element={<Pages.AlgebraExecutor/>} />
             </Route>
         </Routes>
     );
