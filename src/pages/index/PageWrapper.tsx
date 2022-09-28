@@ -27,6 +27,7 @@ export default function PageWrapper() {
                 <Link to={"/"+routes.qrMaker}>QRMaker</Link>
                 <Link to={"/"+routes.mahtTrainer}>MahtTraienr</Link>
                 <Link to={"/"+routes.algebraExecutor}>Algebra tool [AlEx]</Link>
+                <Link to={"/"+routes.cTool}>Code Tool</Link>
             </nav>
             <Outlet/>
         </>
