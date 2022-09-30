@@ -1,4 +1,6 @@
 import RPath from "./RPath";
+import JSZip from "jszip";
+import downloadZip from "./downloadZip";
 
 /**
  * >>>>>>>>>>>>>>> WARNING!!!! <<<<<<<<<<<
@@ -12,7 +14,7 @@ import RPath from "./RPath";
  *
  */
 
-class CodeShatterShard {
+export class CodeShatterShard {
     readonly inside:CodeShatterShard[] = [];
     constructor(
         private readonly textFull: readonly [string],
@@ -34,9 +36,16 @@ class CodeShatterShard {
     }
 }
 
+export type WebunpackedProjectFileTree = {[key:string]:[WebunpackedProjectFileTree,number]|[WebunpackedProjectFileTree]};
+export type WebunpackedProjectReferences = {[key:string]:number};
+export interface WebunpackedProject {
+    fileTree: WebunpackedProjectFileTree;
+    references: WebunpackedProjectReferences;
+}
 
 
-export default class WebUnpack {
+
+export default class Webunpack {
     static shatter(textFull:string) {
         // let k = 0;
 
@@ -144,13 +153,13 @@ export default class WebUnpack {
         );
     }
 
-    static resolveProject(shatteredRoot:CodeShatterShard, specifiedEntryIndex?:number) {
+    static resolveProject(shatteredRoot:CodeShatterShard, specifiedEntryIndex?:number):WebunpackedProject {
         const entryIndex = specifiedEntryIndex ?? this.entryModuleIndex(shatteredRoot);
 
         const modules:RPath[] = [], modulesToResolve:number[] = [entryIndex];
         modules[entryIndex] = new RPath("./$index$");
 
-        const directlyReferencedModules:{[name:string]:number} = {};
+        const references:WebunpackedProjectReferences = {};
 
         while (modulesToResolve.length > 0) {
             const i = modulesToResolve.shift()!;
@@ -162,7 +171,7 @@ export default class WebUnpack {
 
                 if (!depName.startsWith("./") && !depName.startsWith("../")) {
                     // only look at relative paths.
-                    directlyReferencedModules[depName] = j;
+                    references[depName] = j;
                     continue;
                 }
                 if (j in modules)
@@ -173,19 +182,65 @@ export default class WebUnpack {
             }
         }
 
-        type Z = {[key:string]:[Z,number]|[Z]};
-        const fileTree:Z[string] = [{}] as Z[string];
+        const fileTreeRoot:WebunpackedProjectFileTree[string] = [{}] as WebunpackedProjectFileTree[string];
 
         for (const i in modules) {
             const path = modules[i];
-            let t = fileTree;
+            let t = fileTreeRoot;
             for (const entry of path.path)
                 t = t[0][entry] ??= [{}];
             t[1] = parseInt(i);
         }
 
-        return {fileTree,directlyReferencedModules};
+        return {
+            fileTree: fileTreeRoot[0],
+            references,
+        };
+    }
+
+    static async downloadProject(shatteredRoot:CodeShatterShard,specifiedEntry?:number|WebunpackedProject,explicitResolutions?:{[moduleId:string]:string}) {
+        const project = typeof specifiedEntry === "object" ? specifiedEntry : this.resolveProject(shatteredRoot,specifiedEntry);
+        const zip = JSZip();
+
+        this.populateFolderWithProject(shatteredRoot,project,zip,"__entry",new Set<string>,explicitResolutions);
+
+        await downloadZip(zip,"webunpacked");
+    }
+    private static populateFolderWithProject(shatteredRoot:CodeShatterShard,{fileTree,references}:WebunpackedProject,zip:JSZip,folderName:string,createdFolders:Set<string>,explicitResolutions?:{[moduleId:string]:string}) {
+        if (createdFolders.has(folderName)) return;
+        createdFolders.add(folderName);
+        const folder = zip.folder(folderName)!;
+        folder.file("package.json",JSON.stringify({
+            main:"src/$index$.js",
+            private: true,
+            dependencies: Object.fromEntries(Object.keys(references).map(v=>v==="_process"?"process":v).map(depName=>[
+                depName,
+                !explicitResolutions || (depName in explicitResolutions) ? `file:../${depName}` : `${depName}@latest`,
+            ] as const))
+        }));
+
+        if (explicitResolutions) {
+            for (const moduleName in explicitResolutions)
+                if (moduleName in references)
+                    this.populateFolderWithProject(shatteredRoot,this.resolveProject(shatteredRoot,references[moduleName]),zip,moduleName,createdFolders,explicitResolutions);
+        } else {
+            for (const moduleName in references)
+                this.populateFolderWithProject(shatteredRoot,this.resolveProject(shatteredRoot,references[moduleName]),zip,moduleName,createdFolders,explicitResolutions);
+        }
+
+        this.populateFolderWithFileTree(shatteredRoot,fileTree,folder.folder("src")!,v=>v.replace(/require\("_process"\)/g,"require(\"process\")"));
+    }
+    private static populateFolderWithFileTree(shatteredRoot:CodeShatterShard,fileTree:WebunpackedProjectFileTree,folder:JSZip,fileFormatter:(v:string)=>string) {
+        for (const name in fileTree) {
+            const [subFileTree,fileShardIndex] = fileTree[name];
+
+
+            if (fileShardIndex)
+                folder.file(name+".js",fileFormatter(this.moduleCode(this.resolveModuleShard(shatteredRoot,fileShardIndex))));
+            if (Object.keys(subFileTree).length > 0)
+                this.populateFolderWithFileTree(shatteredRoot,subFileTree,folder.folder(name)!,fileFormatter);
+        }
     }
 }
 
-(window as never as {WebUnpack: typeof WebUnpack}).WebUnpack = WebUnpack;
+(window as never as {Webunpack: typeof Webunpack}).Webunpack = Webunpack;
