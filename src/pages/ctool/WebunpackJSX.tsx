@@ -1,6 +1,6 @@
 import { css } from "@emotion/css";
 import React, { useEffect, useState } from "react";
-import Webunpack, { CodeShatterShard, WebunpackedProject, WebunpackedProjectFileTree } from "./Webunpack";
+import Webunpack, { CodeShatterShard, WebunpackedProject, WebunpackedProjectFileTree } from "./WebUnpack";
 
 function WebunpackedFileJSX({file:[subFiles,moduleId],name,rootShard}:{file:WebunpackedProjectFileTree[string],name:string,rootShard:CodeShatterShard}) {
     const [code,setCode] = useState<string>();
