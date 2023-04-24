@@ -63,6 +63,22 @@ tests.push(...[
     ...maclaurenCard("cos(x)","(-1)^n \\frac{x^{2n}}{(2n)!}","(-\\infty,\\infty)"),
 ]);
 
+function seriesErrorCard(
+    name: string,
+    err: string,
+    condition: string[],
+):Card {
+    return {
+        front: `${name} error formula`,
+        back: `$$ \\left| R_n \\right| \\le ${err} $$ if $$ ${condition.join(" $$ and $$")} $$`
+    };
+}
+tests.push(...[
+    seriesErrorCard("geometric","\\left|\\frac{a_{n+1}}{1-r}\\right|",["a_n=ar^n"]),
+    seriesErrorCard("alternating","\\left| a_{n+1} \\right|",["\\left| a_{n+1} \\right| < \\left| a_n \\right|"]),
+    seriesErrorCard("lagrange","max_c \\left|f^{(n+1)}(c) \\frac{\\left(x-a\\right)^{n+1}}{(n+1)!}\\right|",["c \\in [x,a]"]),
+]);
+
 export default function CalcFlashcards() {
     const [{front,back},setCard] = useState(Random.sample(tests));
     const randomizeCard = ()=>setCard(Random.sample(tests));
